@@ -1,0 +1,88 @@
+using System.Collections;
+using System.Collections.Generic;
+using UnityEngine;
+
+public static class LaserRaycast 
+{
+    public static void Shoot(Vector3 shootPosition, Vector3 shootDirection) {
+        RaycastHit2D raycastHit2D = Physics2D.Raycast(shootPosition, shootDirection);
+        if (raycastHit2D.collider != null){
+            //hit
+            Target target = raycastHit2D.collider.GetComponent<Target>();
+            if (target != null) {
+
+                target.Damage();
+            }
+        }
+   }
+}
+
+
+NEXT  
+
+
+using System.Collections;
+using System.Collections.Generic;
+using UnityEngine;
+
+public class LaserFire : MonoBehaviour
+{
+    public Camera cam;
+    public LineRenderer lineRenderer;
+    public Transform firePoint;
+    public Transform aimPoint;
+    public Transform raycastOrigin;
+    
+    private void Awake() {
+        GetComponent<CharacterAim_Base>().OnShoot += PlayerShootProjectiles_OnShoot;
+    }
+
+    private void PlayerShootProjectiles_OnShoot(object sender, CharacterAim_Base.OnShootEventArgs e){
+        //shoot
+        Vector3 shootDir = (e.shootPosition - e.gunEndPointPosition).normalized;
+        BullrtRaycast.Shoot(e.gunEndPointPosition, shootDir);
+    }
+
+    void Start()
+    {
+        DisableLaser();
+    }
+
+    // Update is called once per frame
+    void Update()
+    {
+        if(Input.GetKeyDown(KeyCode.Space)) {
+            EnableLaser();
+        }
+
+        if(Input.GetKey(KeyCode.Space)) {
+            UpdateLaser();
+        }
+
+        if(Input.GetKeyUp(KeyCode.Space)){
+            DisableLaser();
+
+        }
+    }
+
+    void EnableLaser()
+    {
+        lineRenderer.enabled = true;
+    }
+
+    void DisableLaser(){
+        lineRenderer.enabled = false;
+    }
+
+    void UpdateLaser() {
+        lineRenderer.SetPosition(0, firePoint.position);
+                RaycastHit2D hit = Physics2D.Raycast(raycastOrigin.position, transform.up);
+
+        if(hit){
+            lineRenderer.SetPosition(1, hit.point);
+        }
+
+        
+
+    }
+}
